@@ -105,6 +105,7 @@ func CheckRedisContinously(redisConnPool *redigo.Pool, ticker *time.Ticker, url 
 		select {
 		case <-StopTicker:
 			ticker.Stop()
+			logrus.Info("stop check redis")
 			return
 		case <-ticker.C:
 			client := redisConnPool.Get()
@@ -163,4 +164,16 @@ func ReconnectRedis(url string, opt *RedisConnectionPoolOptions) {
 
 	// close client
 	_ = c.Close()
+}
+
+// CloseConnection is method to close redis connection
+func CloseConnection(redisConnPool *redigo.Pool) {
+	if redisConnPool != nil {
+		if err := redisConnPool.Close(); err != nil {
+			logrus.Error(err)
+			return
+		}
+
+		logrus.Info("success close redis connection🔴")
+	}
 }

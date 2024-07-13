@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"github.com/gin-gonic/gin"
 	"github.com/rshby/go-redis-lock/database"
 	"github.com/rshby/go-redis-lock/internal/cache"
@@ -10,6 +11,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"time"
 )
 
 func init() {
@@ -46,14 +48,14 @@ func main() {
 		for {
 			select {
 			case <-chanSignal:
-				// TODO : gracefull shutdown
 				logrus.Info("receive interupt signal")
+				GracefullShutdown(&server)
 				chanExit <- true
+				return
 			case err := <-chanServerError:
 				logrus.Error(err)
-				// TODO : gracefull shutdown
+				GracefullShutdown(&server)
 				chanExit <- true
-			case <-chanExit:
 				return
 			}
 		}
@@ -70,5 +72,26 @@ func main() {
 
 	<-chanExit
 	close(chanExit)
-	logrus.Info("server exit")
+	logrus.Info("server exit❌")
+}
+
+// GracefullShutdown is function to shutdown server
+func GracefullShutdown(server *http.Server) {
+	// stop and shutdown server
+	if server != nil {
+		server.Close()
+
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+
+		if err := server.Shutdown(ctx); err != nil {
+			logrus.Fatal("force close server🔴")
+		}
+
+		logrus.Info("success shutdown server")
+	}
+
+	// stop database connection
+	database.StopTicker <- true
+	database.CloseConnection(database.RedisConnPool)
 }
