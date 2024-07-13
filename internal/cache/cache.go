@@ -2,6 +2,8 @@ package cache
 
 import (
 	"encoding/json"
+	"github.com/go-redsync/redsync/v4"
+	redigosync "github.com/go-redsync/redsync/v4/redis/redigo"
 	redigo "github.com/gomodule/redigo/redis"
 	"github.com/rshby/go-redis-lock/internal/cache/interfaces"
 	"github.com/rshby/go-redis-lock/internal/config"
@@ -32,6 +34,7 @@ func NewCacheManager(redisConnPool *redigo.Pool) interfaces.CacheManager {
 		connPool:       redisConnPool,
 		defaultTTL:     config.RedisTTL(),
 		enableCache:    config.EnableCache(),
+		lockConnPool:   redisConnPool,
 	}
 }
 
@@ -76,6 +79,31 @@ func (c *cacheManager) Set(key string, value any) error {
 	}
 
 	return nil
+}
+
+// AcquireLock is function to acquire lock by key
+func (c *cacheManager) AcquireLock(key string) (*redsync.Mutex, error) {
+	key = c.prefixCacheKey + "lock:" + key
+
+	// create new pool
+	pool := redigosync.NewPool(c.lockConnPool)
+
+	// create mutex
+	mutex := redsync.New(pool).NewMutex(
+		key,
+		redsync.WithExpiry(30*time.Second),
+		redsync.WithTries(3),
+	)
+
+	// lock the mutex
+	return mutex, mutex.Lock()
+}
+
+// SafeUnlock is function to unlock mutex
+func (c *cacheManager) SafeUnlock(mutex *redsync.Mutex) {
+	if mutex != nil {
+		_, _ = mutex.Unlock()
+	}
 }
 
 // GetByKey is function to get value by key

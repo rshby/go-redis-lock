@@ -75,6 +75,8 @@ func InitializeRedisConn(url string, opt *RedisConnectionPoolOptions) {
 	}
 
 	go CheckRedisContinously(RedisConnPool, time.NewTicker(5*time.Second), url, opt)
+
+	logger.Info("success create connection redis ", url)
 }
 
 // IsValidURL is function to check url is valid or not

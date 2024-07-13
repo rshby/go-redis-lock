@@ -1,24 +1,19 @@
 package main
 
 import (
-	"encoding/json"
-	"fmt"
+	"github.com/gin-gonic/gin"
 	"github.com/rshby/go-redis-lock/database"
 	"github.com/rshby/go-redis-lock/internal/cache"
 	"github.com/rshby/go-redis-lock/internal/config"
 	"github.com/rshby/go-redis-lock/internal/logger"
 	"github.com/sirupsen/logrus"
-	"reflect"
-	"time"
+	"net/http"
+	"os"
+	"os/signal"
 )
 
 func init() {
 	logger.SetupLogger()
-}
-
-type User struct {
-	ID   int
-	Name string
 }
 
 func main() {
@@ -27,19 +22,53 @@ func main() {
 
 	// initialize cacheManager
 	cacheManager := cache.NewCacheManager(database.RedisConnPool)
+	cacheManager.Set("ok", 1)
 
-	user1 := User{1, "Febian Diska Haryuningtyas"}
-	user1Json, _ := json.Marshal(&user1)
-	if err := cacheManager.Set("oke3", string(user1Json)); err != nil {
-		logrus.Error(err)
+	// initialize app
+	app := gin.Default()
+
+	// server
+	server := http.Server{
+		Addr:    ":4000",
+		Handler: app,
 	}
 
-	key, err := cache.GetByKey[*User](cacheManager, "oke3")
-	if err != nil {
-		logrus.Error(err)
-	}
+	var (
+		chanSignal      = make(chan os.Signal, 1)
+		chanServerError = make(chan error, 1)
+		chanExit        = make(chan bool)
+	)
 
-	fmt.Println(key, reflect.TypeOf(key))
+	signal.Notify(chanSignal, os.Interrupt)
 
-	time.Sleep(1 * time.Hour)
+	//
+	go func() {
+		for {
+			select {
+			case <-chanSignal:
+				// TODO : gracefull shutdown
+				logrus.Info("receive interupt signal")
+				chanExit <- true
+			case err := <-chanServerError:
+				logrus.Error(err)
+				// TODO : gracefull shutdown
+				chanExit <- true
+			case <-chanExit:
+				return
+			}
+		}
+	}()
+
+	// run server
+	go func() {
+		logrus.Infof("app run in port 4000")
+		if err := server.ListenAndServe(); err != nil {
+			chanServerError <- err
+			return
+		}
+	}()
+
+	<-chanExit
+	close(chanExit)
+	logrus.Info("server exit")
 }
