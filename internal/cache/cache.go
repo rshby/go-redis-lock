@@ -7,6 +7,7 @@ import (
 	redigo "github.com/gomodule/redigo/redis"
 	"github.com/rshby/go-redis-lock/internal/cache/interfaces"
 	"github.com/rshby/go-redis-lock/internal/config"
+	"github.com/sirupsen/logrus"
 	"reflect"
 	"time"
 )
@@ -104,6 +105,32 @@ func (c *cacheManager) SafeUnlock(mutex *redsync.Mutex) {
 	if mutex != nil {
 		_, _ = mutex.Unlock()
 	}
+}
+
+// DeleteByKeys is function to delete by keys
+func (c *cacheManager) DeleteByKeys(keys []string) error {
+	if !c.enableCache {
+		return nil
+	}
+
+	if len(keys) == 0 {
+		return nil
+	}
+
+	client := c.connPool.Get()
+	defer client.Close()
+
+	var redisKeys []any
+	for _, key := range keys {
+		redisKeys = append(redisKeys, key)
+	}
+
+	_, err := client.Do("DEL", redisKeys...)
+	if err != nil {
+		logrus.Error(err)
+	}
+
+	return err
 }
 
 // GetByKey is function to get value by key

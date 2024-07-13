@@ -7,4 +7,5 @@ type CacheManager interface {
 	Set(key string, value any) error
 	AcquireLock(key string) (*redsync.Mutex, error)
 	SafeUnlock(mutex *redsync.Mutex)
+	DeleteByKeys(keys []string) error
 }

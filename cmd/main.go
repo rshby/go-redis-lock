@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/gin-gonic/gin"
 	"github.com/rshby/go-redis-lock/database"
+	"github.com/rshby/go-redis-lock/http/router"
 	"github.com/rshby/go-redis-lock/internal/cache"
 	"github.com/rshby/go-redis-lock/internal/config"
 	"github.com/rshby/go-redis-lock/internal/logger"
@@ -19,15 +20,21 @@ func init() {
 }
 
 func main() {
+	// initialize db mysql
+	database.InitializeMysql()
+
 	// initialize redis
 	database.InitializeRedisConn(config.RedisDSN(), nil)
 
 	// initialize cacheManager
 	cacheManager := cache.NewCacheManager(database.RedisConnPool)
-	cacheManager.Set("ok", 1)
 
 	// initialize app
 	app := gin.Default()
+
+	// router
+	appRouter := router.NewAppRouter(&app.RouterGroup, cacheManager)
+	appRouter.InitEndpoint()
 
 	// server
 	server := http.Server{
@@ -93,5 +100,6 @@ func GracefullShutdown(server *http.Server) {
 
 	// stop database connection
 	database.StopTicker <- true
+	time.Sleep(500 * time.Millisecond)
 	database.CloseConnection(database.RedisConnPool)
 }

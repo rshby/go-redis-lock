@@ -134,3 +134,84 @@ func RedisPrefixKey() string {
 func RedisDSN() string {
 	return fmt.Sprintf("redis://%s:%d/%d", RedisHost(), RedisPort(), RedisDBNumber())
 }
+
+// MySqlHost is function to get db mysql host from env
+func MySqlHost() string {
+	mode := Mode()
+	switch mode {
+	case ModeLocal:
+		if host := GetEnv("DB_HOST"); host != "" {
+			return host
+		}
+
+		return DefaultMySqlHost
+	case ModeDev:
+		if host := GetEnv("DB_LOCAL_HOST"); host != "" {
+			return host
+		}
+
+		return DefaultMySqlHost
+	default:
+		return DefaultMySqlHost
+	}
+}
+
+// MySqlPort is function to get mysql port from env
+func MySqlPort() int {
+	if port := GetEnv("DB_PORT"); port != "" {
+		mysqlPort, err := strconv.Atoi(port)
+		if err != nil {
+			return DefaultMySqlPort
+		}
+
+		return mysqlPort
+	}
+
+	return DefaultMySqlPort
+}
+
+// MySqlUser is function to get mysql user from env
+func MySqlUser() string {
+	if user := GetEnv("DB_USER"); user != "" {
+		return user
+	}
+
+	return DefaultMySqlUser
+}
+
+// MySqlPassword is function to get mysql password from env
+func MySqlPassword() string {
+	if password := GetEnv("DB_PASSWORD"); password != "" {
+		return password
+	}
+
+	return DefaultMySqlPassword
+}
+
+// MySqlDbName is function to get db name from env
+func MySqlDbName() string {
+	if name := GetEnv("DB_NAME"); name != "" {
+		return name
+	}
+
+	return DefaultMysqlDbName
+}
+
+// MySqlDSN is function to connect with database mysql
+func MySqlDSN() string {
+	return fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=True&loc=Local", MySqlUser(), MySqlPassword(), MySqlHost(), MySqlPort(), MySqlDbName())
+}
+
+// EnableMigrationDbMysql is function to get enable migration from env
+func EnableMigrationDbMysql() bool {
+	if enable := GetEnv("ENABLE_MIGRATION_DB"); enable != "" {
+		parseBool, err := strconv.ParseBool(enable)
+		if err != nil {
+			return DefaultEnableMigration
+		}
+
+		return parseBool
+	}
+
+	return DefaultEnableMigration
+}
