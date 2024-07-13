@@ -6,6 +6,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"os"
 	"strconv"
+	"time"
 )
 
 // GetEnv is function to load env and get value by key
@@ -17,6 +18,15 @@ func GetEnv(key string) string {
 	}
 
 	return os.Getenv(key)
+}
+
+// AppName is method to get app name from env
+func AppName() string {
+	if name := GetEnv("APP_NAME"); name != "" {
+		return name
+	}
+
+	return DefaultAppName
 }
 
 // Mode is function to get mode from env
@@ -35,6 +45,20 @@ func Mode() string {
 	default:
 		return DefaultMode
 	}
+}
+
+// EnableCache is method to get enable cache from env
+func EnableCache() bool {
+	if enablCache := GetEnv("ENABLE_CACHE"); enablCache != "" {
+		parseBool, err := strconv.ParseBool(enablCache)
+		if err != nil {
+			return DefaultEnableCache
+		}
+
+		return parseBool
+	}
+
+	return DefaultEnableCache
 }
 
 // RedisHost is function to get redis host from env
@@ -83,6 +107,27 @@ func RedisDBNumber() int {
 	}
 
 	return DefaultRedisDBNumber
+}
+
+// RedisTTL is function to get redis TTL from env
+func RedisTTL() time.Duration {
+	if ttl := GetEnv("REDIS_TTL"); ttl != "" {
+		duration, err := time.ParseDuration(ttl)
+		if err != nil {
+			return DefaultRedisTTL
+		}
+
+		return duration
+	}
+
+	return DefaultRedisTTL
+}
+
+// RedisPrefixKey is function to get redis prefix key
+func RedisPrefixKey() string {
+	appName := AppName()
+	mode := Mode()
+	return fmt.Sprintf("%s_mode:%s_", appName, mode)
 }
 
 // RedisDSN is function to get redis dsn
