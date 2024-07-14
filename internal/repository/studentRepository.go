@@ -132,3 +132,15 @@ func (s *studentRepository) Insert(ctx context.Context, tx *gorm.DB, input *mode
 
 	return nil
 }
+
+// LockCreateNewStudentByEmail is method to lock process create new studen by email
+func (s *studentRepository) LockCreateNewStudentByEmail(ctx context.Context, email string) (func(), error) {
+	// create lockKey
+	lockKey := cache.CreateNewStudentLockKeyByEmail(email)
+
+	mutex, err := s.cache.AcquireLock(lockKey)
+
+	return func() {
+		s.cache.SafeUnlock(mutex)
+	}, err
+}

@@ -25,12 +25,14 @@ const (
 	DefaultRedisTTL             = 15 * time.Minute
 
 	// mysql
-	DefaultMySqlHost         = "localhost"
-	DefaultMySqlPort         = 3306
-	DefaultMySqlUser         = "root"
-	DefaultMySqlPassword     = "root"
-	DefaultMysqlDbName       = "go_redis_lock_db"
-	DefaultMySqlIdleConns    = 30
-	DefaultMysqlMaxOpenConns = 100
-	DefaultEnableMigration   = false
+	DefaultMySqlHost            = "localhost"
+	DefaultMySqlPort            = 3306
+	DefaultMySqlUser            = "root"
+	DefaultMySqlPassword        = "root"
+	DefaultMysqlDbName          = "go_redis_lock_db"
+	DefaultMySqlIdleConns       = 30
+	DefaultMysqlMaxOpenConns    = 100
+	DefaultMySqlConnMaxIdletime = 30 * time.Minute
+	DefaultMySqlConnMaxLifetime = 1 * time.Hour
+	DefaultEnableMigration      = false
 )

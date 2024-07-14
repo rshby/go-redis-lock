@@ -199,7 +199,7 @@ func MySqlDbName() string {
 
 // MySqlDSN is function to connect with database mysql
 func MySqlDSN() string {
-	return fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=True&loc=Local", MySqlUser(), MySqlPassword(), MySqlHost(), MySqlPort(), MySqlDbName())
+	return fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=True&loc=UTC", MySqlUser(), MySqlPassword(), MySqlHost(), MySqlPort(), MySqlDbName())
 }
 
 // EnableMigrationDbMysql is function to get enable migration from env
@@ -214,4 +214,60 @@ func EnableMigrationDbMysql() bool {
 	}
 
 	return DefaultEnableMigration
+}
+
+// MySqlMaxIdleConns is function to get mysql max idle conns from env
+func MySqlMaxIdleConns() int {
+	if conn := GetEnv("DB_MAX_IDLE_CONNS"); conn != "" {
+		mysqlMaxIdleConns, err := strconv.Atoi(conn)
+		if err != nil {
+			return DefaultMySqlIdleConns
+		}
+
+		return mysqlMaxIdleConns
+	}
+
+	return DefaultMySqlIdleConns
+}
+
+// MySqlMaxOpenConns is function to get max open conns from env
+func MySqlMaxOpenConns() int {
+	if conns := GetEnv("DB_MAX_OPEN_CONNS"); conns != "" {
+		maxOpenConns, err := strconv.Atoi(conns)
+		if err != nil {
+			return DefaultMysqlMaxOpenConns
+		}
+
+		return maxOpenConns
+	}
+
+	return DefaultMysqlMaxOpenConns
+}
+
+// MysqlConnMaxIdletime is function to get conn max idletime from env
+func MysqlConnMaxIdletime() time.Duration {
+	if tm := GetEnv("DB_CONN_MAX_IDLETIME"); tm != "" {
+		duration, err := time.ParseDuration(tm)
+		if err != nil {
+			return DefaultMySqlConnMaxIdletime
+		}
+
+		return duration
+	}
+
+	return DefaultMySqlConnMaxIdletime
+}
+
+// MySqlConnMaxLifetime is function to get conn max lifetime from env
+func MySqlConnMaxLifetime() time.Duration {
+	if lifetime := GetEnv("DB_CONN_MAX_LIFETIME"); lifetime != "" {
+		duration, err := time.ParseDuration(lifetime)
+		if err != nil {
+			return DefaultMySqlConnMaxLifetime
+		}
+
+		return duration
+	}
+
+	return DefaultMySqlConnMaxLifetime
 }

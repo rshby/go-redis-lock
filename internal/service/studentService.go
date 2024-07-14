@@ -78,8 +78,16 @@ func (s *studentService) CreateNewStudent(ctx context.Context, request *dto.Crea
 		"request": helper.Dump(request),
 	})
 
+	// Lock with redis by email
+	mutexUnlock, err := s.studentRepo.LockCreateNewStudentByEmail(ctx, request.Email)
+	defer mutexUnlock()
+	if err != nil {
+		logger.Error(err)
+		return httpresponse.ErrorInternalServerError
+	}
+
 	// validate
-	if err := validatorutils.Validate.Struct(*request); err != nil {
+	if err = validatorutils.Validate.Struct(*request); err != nil {
 		logger.Error(err)
 		return validatorutils.GetHttpErrorByTag(err)
 	}

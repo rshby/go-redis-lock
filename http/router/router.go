@@ -41,6 +41,7 @@ func (r *AppRouter) InitEndpoint() {
 		studentGroup := apiV1.Group("/student")
 		{
 			studentGroup.GET("/:id", studentHandler.GetByID)
+			studentGroup.POST("/", studentHandler.CreateNewStudent)
 		}
 	}
 }

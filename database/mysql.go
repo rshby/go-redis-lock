@@ -7,7 +7,6 @@ import (
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
-	"time"
 )
 
 var (
@@ -43,10 +42,30 @@ func OpenMysqlConnection(url string) *gorm.DB {
 		logrus.Error(err)
 	}
 
-	dbMysql.SetMaxIdleConns(20)                  // TODO : ambil dari config
-	dbMysql.SetMaxOpenConns(100)                 // TODO : ambil dari config
-	dbMysql.SetConnMaxIdleTime(30 * time.Minute) // TODO : ambil dari config
-	dbMysql.SetConnMaxLifetime(1 * time.Hour)    // TODO : ambil dari config
+	dbMysql.SetMaxIdleConns(config.MySqlMaxIdleConns())
+	dbMysql.SetMaxOpenConns(config.MySqlMaxOpenConns())
+	dbMysql.SetConnMaxIdleTime(config.MysqlConnMaxIdletime())
+	dbMysql.SetConnMaxLifetime(config.MySqlConnMaxLifetime())
 
 	return db
+}
+
+// CloseMySqlConnection is function to close db mysql connection
+func CloseMySqlConnection(db *gorm.DB) {
+	if db == nil {
+		return
+	}
+
+	mySqlDB, err := db.DB()
+	if err != nil {
+		logrus.Error(err)
+		return
+	}
+
+	if err := mySqlDB.Close(); err != nil {
+		logrus.Infof("failed to close db mysql connection : %v", err)
+		return
+	}
+
+	logrus.Info("succes close mysql connection")
 }

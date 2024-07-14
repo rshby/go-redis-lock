@@ -31,3 +31,10 @@ func WrapApiResponse(httpError *HttpError, message string, data any) *dto.ApiRes
 
 	return &response
 }
+
+var (
+	RESPONSE_MESSAGE = map[string]string{
+		"CreateNewStudent": "Success Create New Student",
+		"GetStudentByID":   "Success Get Data Student by id",
+	}
+)

@@ -82,7 +82,7 @@ func main() {
 	logrus.Info("server exit❌")
 }
 
-// GracefullShutdown is function to shutdown server
+// GracefullShutdown is function to shut down server
 func GracefullShutdown(server *http.Server) {
 	// stop and shutdown server
 	if server != nil {
@@ -101,5 +101,6 @@ func GracefullShutdown(server *http.Server) {
 	// stop database connection
 	database.StopTicker <- true
 	time.Sleep(500 * time.Millisecond)
+	database.CloseMySqlConnection(database.DatabaseMySQL)
 	database.CloseConnection(database.RedisConnPool)
 }
