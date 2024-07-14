@@ -10,4 +10,5 @@ type StudentService interface {
 	GetByID(ctx context.Context, id int) (*dto.GetStudentResponseDTO, *httpresponse.HttpError)
 	GetByEmail(ctx context.Context, email string) (*dto.GetStudentResponseDTO, *httpresponse.HttpError)
 	CreateNewStudent(ctx context.Context, request *dto.CreateStudentRequestDTO) *httpresponse.HttpError
+	BurstStudentCount(ctx context.Context, count int) ([]dto.GetStudentResponseDTO, *httpresponse.HttpError)
 }

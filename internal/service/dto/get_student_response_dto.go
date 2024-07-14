@@ -6,14 +6,14 @@ import (
 )
 
 type GetStudentResponseDTO struct {
-	ID             int    `json:"id" `
-	FirstName      string `json:"first_name"`
-	LastName       string `json:"last_name"`
-	IdentityNumber string `json:"identity_number"`
-	Email          string `json:"email"`
-	Address        string `json:"address"`
-	CreatedAt      string `json:"created_at"`
-	UpdateAt       string `json:"update_at"`
+	ID             int    `json:"id,omitempty" `
+	FirstName      string `json:"first_name,omitempty"`
+	LastName       string `json:"last_name,omitempty"`
+	IdentityNumber string `json:"identity_number,omitempty"`
+	Email          string `json:"email,omitempty"`
+	Address        string `json:"address,omitempty"`
+	CreatedAt      string `json:"created_at,omitempty"`
+	UpdateAt       string `json:"update_at,omitempty"`
 }
 
 // ConvertStudentEntityToStudentResponse is function to convert entity student to response student

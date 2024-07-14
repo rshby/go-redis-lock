@@ -13,4 +13,5 @@ type StudentRepository interface {
 
 	// lock
 	LockCreateNewStudentByEmail(ctx context.Context, email string) (func(), error)
+	LockBurstStudentCountByEpoch(ctx context.Context, epochTime int64) (func(), error)
 }

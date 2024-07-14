@@ -144,3 +144,13 @@ func (s *studentRepository) LockCreateNewStudentByEmail(ctx context.Context, ema
 		s.cache.SafeUnlock(mutex)
 	}, err
 }
+
+// LockBurstStudentCountByEpoch is method to lock process burst student count by epoch
+func (s *studentRepository) LockBurstStudentCountByEpoch(ctx context.Context, epochTime int64) (func(), error) {
+	lockKey := cache.BurstStudentCountLockKeyByEpoch(epochTime)
+
+	mutex, err := s.cache.AcquireLock(lockKey)
+	return func() {
+		s.cache.SafeUnlock(mutex)
+	}, err
+}

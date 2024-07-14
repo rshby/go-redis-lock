@@ -28,6 +28,9 @@ func GetHttpErrorByTag(err error) *httpresponse.HttpError {
 		case "email":
 			httpError = httpresponse.ErrorBadRequest.WithMessage(fmt.Sprintf("%s should be an email format", fieldError.Field()))
 			return httpError
+		case "gt":
+			httpError = httpresponse.ErrorBadRequest.WithMessage(fmt.Sprintf("count must be more than %s", fieldError.Param()))
+			return httpError
 		default:
 			httpError = httpresponse.ErrorBadRequest
 			return httpError

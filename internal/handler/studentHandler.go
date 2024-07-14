@@ -72,3 +72,23 @@ func (s *StudentHandler) CreateNewStudent(ctx *gin.Context) {
 	httpresponse.ResponseOK(ctx, httpresponse.RESPONSE_MESSAGE["CreateNewStudent"], nil)
 	return
 }
+
+func (s *StudentHandler) BurstStudentCount(ctx *gin.Context) {
+	logger := logrus.WithContext(ctx).WithFields(logrus.Fields{
+		"context": helper.DumpIncomingContext(ctx),
+	})
+
+	// get count from query
+	count := helper.ExpectNumber[int](ctx.Query("count"))
+
+	response, httpError := s.studentService.BurstStudentCount(ctx, count)
+	if httpError != nil {
+		logger.Error(httpError)
+		httpresponse.ResponseError(ctx, httpError)
+		return
+	}
+
+	// success
+	httpresponse.ResponseOK(ctx, httpresponse.RESPONSE_MESSAGE["BurstStudentCount"], response)
+	return
+}

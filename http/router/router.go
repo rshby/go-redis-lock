@@ -42,6 +42,7 @@ func (r *AppRouter) InitEndpoint() {
 		{
 			studentGroup.GET("/:id", studentHandler.GetByID)
 			studentGroup.POST("/", studentHandler.CreateNewStudent)
+			studentGroup.GET("/burst", studentHandler.BurstStudentCount)
 		}
 	}
 }
